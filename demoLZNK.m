@@ -1,4 +1,4 @@
-WITHOUT_IT_WNOT_WORK = 1; # DAFAQ
+source("householder_lznk.m")
 
 function [A, y] = generateAy(m)
   # construct matrix A (x^2 + x + 1) for x in range [1:10]
@@ -15,19 +15,20 @@ endfunction
 
 
 
-function runTestA(A, y)
-  Householder(A,y)
-endfunction
-
-function runTestB(A, y)
-  [_, R, B] = Householder(A,y);
+function runTest(A, y)
+  [x, R, B] = Householder(A,y);
+  
+  disp("Test A (coefficient accuracy)")
+  x
+  
+  disp("Run test B (QR factorization accuracy)")
   #E = A - B * R;
   #norm(E, 2)
 endfunction
 
 #for m = [10, 20, 100]
-for m = [10]
-  [A, y] = generateAy(11);
-  runTestA(A, y)
-  runTestB(A, y)
+for m = [6]
+  disp("Test data for m = "), disp(m)
+  [A, y] = generateAy(m);
+  runTest(A, y)
 endfor

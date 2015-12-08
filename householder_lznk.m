@@ -1,16 +1,43 @@
-WITHOUT_IT_WNOT_WORK = 1; # DAFAQ
-
-function [x, R, B] = Householder(A, y)
-  # compute Householder vectors
-  B = A;
-  B
-  for v = B
-    #TODO ifelse +/-
-    rank(v, 2)
-    v(1) += rank(v, 2);
+function X = multiplyByQ(X, B, G)
+  # B - matrix where vectors are sequential Householder vectors
+  # G - matrix where vectors are sequential gamma parameters in H_n
+  # returned X = H_1 * .. * H_n * X
+  for j = 1:size(B, 2)
+    v = B(:, j);
+    g = G(j);
+    
+    # Hi = eye(size(B,1)) - v * v' / g;
+    # X = Hi * X;
+    X = X - v * (v' * X) ./ g;
   endfor
-  B
+endfunction
+
+function [x, R, B, G] = Householder(A, y)
+  # variables analogical to http://wazniak.mimuw.edu.pl/index.php?title=MN12
   
-  x = A \ y; # TODO
-  [_, R] = qr(A); #TODO
+  # compute Householder vectors (add 2th norm to nst element of nth vector)
+  # and fill ith where i < n with 0
+  B = A;
+  G = [];
+  R = A;
+  c = y;
+  for j = 1:size(B, 2)
+    # create h_n vector (+ if v(1) positive, - otherwise)
+    B(:, j) = R(:, j);
+    B(1:j-1, j) = 0;
+    v1 = B(j, j);
+    norm2 = norm(B(:, j), 2);
+    B(j, j) = v1 + norm2; #TODO sign
+    v = B(:, j);
+    g = norm2^2 + sign(v1) * v1 * norm2;
+    
+    R = R - v * (v' * R) / g;
+    c = c - v * (v' * c) / g;
+    
+    G = [G; g];
+  endfor
+  # minimalized c = Q^-1 * y and R
+  R = R(1:size(A, 2), :);
+  c = c(1:size(A, 2), :);
+  x = R^-1 * c;
 endfunction
