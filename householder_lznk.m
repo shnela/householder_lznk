@@ -2,12 +2,10 @@ function X = multiplyByQ(X, B, G)
   # B - matrix where vectors are sequential Householder vectors
   # G - matrix where vectors are sequential gamma parameters in H_n
   # returned X = H_1 * .. * H_n * X
-  for j = 1:size(B, 2)
+  for j = fliplr(1:size(B, 2))
     v = B(:, j);
     g = G(j);
     
-    # Hi = eye(size(B,1)) - v * v' / g;
-    # X = Hi * X;
     X = X - v * (v' * X) ./ g;
   endfor
 endfunction
@@ -27,9 +25,14 @@ function [x, R, B, G] = Householder(A, y)
     B(1:j-1, j) = 0;
     v1 = B(j, j);
     norm2 = norm(B(:, j), 2);
-    B(j, j) = v1 + norm2; #TODO sign
+    signv1 = sign(v1);
+    if signv1 == 0
+      # case when v1 == 0
+      signv1 = 1;
+    endif
+    B(j, j) = v1 + signv1 * norm2;
     v = B(:, j);
-    g = norm2^2 + sign(v1) * v1 * norm2;
+    g = norm2^2 + signv1 * v1 * norm2;
     
     R = R - v * (v' * R) / g;
     c = c - v * (v' * c) / g;

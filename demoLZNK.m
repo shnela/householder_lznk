@@ -16,18 +16,20 @@ endfunction
 
 
 function runTest(A, y)
-  [x, R, B] = Householder(A,y);
+  [x, R, B, G] = Householder(A,y);
   
   disp("Test A (coefficient accuracy)")
   x
   
   disp("Run test B (QR factorization accuracy)")
-  #E = A - B * R;
-  #norm(E, 2)
+  [m, n] = size(A);
+  R(n+1:m, :) = 0;
+  QR = multiplyByQ(R, B, G);
+  E = norm(A - QR, 2);
+  E
 endfunction
 
-#for m = [10, 20, 100]
-for m = [6]
+for m = [10, 20, 100]
   disp("Test data for m = "), disp(m)
   [A, y] = generateAy(m);
   runTest(A, y)
